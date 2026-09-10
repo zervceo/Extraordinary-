@@ -1,0 +1,26 @@
+# mbtok working data
+.mbtok/
+out/
+renders/
+*.mp4
+*.mov
+*.wav
+*.mp3
+*.m4a
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+build/
+dist/
+
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
