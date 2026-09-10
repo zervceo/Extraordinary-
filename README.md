@@ -9,6 +9,7 @@ No generative model is involved at any stage. Every frame that reaches the outpu
 ```bash
 mbtok scan ~/Downloads/Envato\ Elements ~/Pictures
 mbtok boards                      # which moods does my library support?
+mbtok preview --preset clean-girl # see the shots as a contact sheet, in seconds
 mbtok make --preset clean-girl    # render one post
 mbtok batch --count 7             # render a week
 ```
@@ -48,6 +49,9 @@ mbtok doctor      # confirms everything is in place
    [ curate ]      score each asset against the mood, then pick a set that
        |           does not repeat itself
        |
+   [ preview ]     optional: a contact sheet in seconds, before committing
+       |           a minute to an encode
+       |
    [ storyboard ]  allocate whole beats to shots so every cut is on the beat
        |
    [ render ]      one ffmpeg pass: Ken Burns, crossfades, grade, grain, text
@@ -64,6 +68,16 @@ Every image and clip is probed with `ffprobe` and decoded down to a small RGB gr
 Results are cached against a cheap file fingerprint, so the slow first pass happens once. Rescanning a library that has not changed takes no time at all.
 
 It also records where each file came from — Envato, Artgrid, Adobe Stock, your camera roll — from the path. That feeds the provenance record attached to every post.
+
+**Your Photos library is included.** Most of a Mac's photographs live inside a `.photoslibrary` package rather than loose in Pictures, and `mbtok init` picks up the `originals` folder inside it automatically. Those are ordinary readable files, so there is no export step. The thumbnails and databases in the rest of the package are skipped. They are usually HEIC; if your ffmpeg was built without HEIC support, `mbtok scan` tells you so and what to do about it.
+
+### Deciding where to crop
+
+A 16:9 photograph cropped to 9:16 keeps barely a third of its width, and a blind centre crop throws away whichever third the subject happened to be in.
+
+There is no face detection here and there does not need to be. The eye goes to detail and colour, so mbtok sums edge energy and saturation across each frame, slides a 9:16 window along it, and takes the position that captures the most. The choice is pulled back toward the centre by an amount that depends on how strong the evidence is: a frame with one obvious subject is largely trusted, while an evenly detailed frame stays in the middle, because there the middle really is the best answer. Footage is sampled at several points and averaged, so the framing stays fixed for the whole shot.
+
+The integration suite plants a subject in the left third of a wide frame and checks the crop keeps it. A centred crop loses it completely.
 
 ### Curating
 
@@ -147,6 +161,7 @@ Every render writes a `*.provenance.json` next to the video listing every source
 | `mbtok scan [folders...]` | Index your media (incremental after the first run) |
 | `mbtok presets [-v]` | List the moods |
 | `mbtok boards [--preset K --show]` | Score your library against every mood |
+| `mbtok preview` | Contact sheet of a board, no video encode |
 | `mbtok make` | Render one post |
 | `mbtok batch --count 7` | Render several, sharing one cooldown |
 | `mbtok status` | What you have posted, what is resting |
@@ -167,6 +182,8 @@ Useful flags on `make` and `batch`:
 ```
 
 `--dry-run` prints the exact command. If a render looks wrong, that is the fastest way to see why.
+
+`mbtok preview` is the one to reach for while you are still deciding. It builds the board exactly as `make` would — same curation, same ordering, same crop, same grade — and tiles one numbered thumbnail per shot into a single image. It takes a few seconds instead of a minute, and it does not touch the cooldown, so previewing a board never uses up its footage.
 
 ---
 
@@ -190,6 +207,7 @@ The rendered audio is a guide track. Swapping to a trending sound inside TikTok 
 ```
 mbtok/
   color.py       palette extraction, Lab distance, aesthetic metrics
+  crop.py        where to crop a frame that is the wrong shape for a phone
   library.py     scanning, indexing, quality scoring, caching
   presets.py     the thirteen moods: palette, grade, pacing, typography, voice
   curate.py      scoring, diverse selection, shot ordering
@@ -211,4 +229,4 @@ make test        # everything, including real ffmpeg renders
 make test-fast   # skip the ffmpeg integration tests
 ```
 
-279 tests. The integration tests build a small library of real files, render it, and probe the result — they are the ones that prove the emitted filtergraph is something ffmpeg will actually accept. They skip themselves automatically if ffmpeg is not installed.
+315 tests. The integration tests build a small library of real files, render it, and probe the result — they are the ones that prove the emitted filtergraph is something ffmpeg will actually accept. They skip themselves automatically if ffmpeg is not installed.

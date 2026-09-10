@@ -21,12 +21,18 @@ from typing import Sequence
 
 from . import ffmpeg as ff
 from .audio import BeatGrid
+from .crop import Focus
 from .presets import Grade, Preset, Typography
 from .storyboard import Shot, Storyboard
 from .typeset import fit as fit_text
 from .util import clamp
 
 log = logging.getLogger("mbtok.render")
+
+#: Below this, a focus point is treated as no evidence at all and the crop
+#: falls back to centred. An evenly detailed frame scores low here, and for
+#: such a frame the centre really is the right answer.
+MIN_FOCUS_CONFIDENCE = 0.12
 
 #: Stills are pre-scaled to this multiple of the output size before the Ken
 #: Burns move, so panning happens in source pixels finer than output pixels
@@ -84,12 +90,61 @@ def _time(value: float) -> str:
     return _fmt(value, places=6)
 
 
-def cover_scale(width: int, height: int) -> str:
-    """Scale-and-crop that fills *width* x *height* without letterboxing."""
-    return (
+def cover_scale(
+    width: int,
+    height: int,
+    focus: Focus | None = None,
+    source_aspect: float = 0.0,
+) -> str:
+    """Scale-and-crop that fills *width* x *height* without letterboxing.
+
+    With a *focus* point and the source's aspect ratio, the crop window is
+    placed over the interesting part of the frame instead of its middle. The
+    offset is written as a fraction of ``iw-ow``, so it stays correct whatever
+    size the preceding scale produced.
+    """
+    chain = (
         f"scale={width}:{height}:force_original_aspect_ratio=increase:flags=lanczos,"
-        f"crop={width}:{height}"
     )
+    position = crop_position(focus, source_aspect, width / height if height else 0.0)
+    if position is None:
+        return chain + f"crop={width}:{height}"
+    axis, fraction = position
+    if axis == "x":
+        return chain + f"crop={width}:{height}:x=(iw-ow)*{_fmt(fraction)}:y=0"
+    return chain + f"crop={width}:{height}:x=0:y=(ih-oh)*{_fmt(fraction)}"
+
+
+def crop_position(
+    focus: Focus | None, source_aspect: float, target_aspect: float
+) -> tuple[str, float] | None:
+    """Where to place the crop window, as a fraction of the available slack.
+
+    Returns the axis being cropped and a 0-1 position along it, or ``None``
+    when the frame needs no crop on either axis or there is no focus worth
+    acting on. A low-confidence focus is ignored rather than trusted, because
+    an evenly detailed frame gives no real evidence about where to crop.
+    """
+    if focus is None or source_aspect <= 0 or target_aspect <= 0:
+        return None
+    if focus.confidence < MIN_FOCUS_CONFIDENCE or focus.is_centred:
+        return None
+
+    if source_aspect > target_aspect:
+        window = target_aspect / source_aspect
+        slack = 1.0 - window
+        if slack <= 1e-6:
+            return None
+        return ("x", clamp((focus.x - window / 2.0) / slack, 0.0, 1.0))
+
+    if source_aspect < target_aspect:
+        window = source_aspect / target_aspect
+        slack = 1.0 - window
+        if slack <= 1e-6:
+            return None
+        return ("y", clamp((focus.y - window / 2.0) / slack, 0.0, 1.0))
+
+    return None
 
 
 def kenburns_expressions(motion: str, zoom: float, frames: int) -> tuple[str, str, str]:
@@ -159,10 +214,13 @@ def shot_chain(shot: Shot, board: Storyboard, preset: Preset) -> str:
     fps = board.fps
     parts: list[str] = []
 
+    focus = shot.asset.focus
+    aspect = shot.asset.aspect
+
     if shot.is_video:
         if shot.speed != 1.0 and shot.speed > 0:
             parts.append(f"setpts=PTS/{_fmt(shot.speed)}")
-        parts.append(cover_scale(width, height))
+        parts.append(cover_scale(width, height, focus, aspect))
         parts.append(f"fps={fps}")
         # Clone the final frame rather than come up short: a clip a few frames
         # shy of its slot would otherwise shorten the whole timeline.
@@ -177,7 +235,7 @@ def shot_chain(shot: Shot, board: Storyboard, preset: Preset) -> str:
         # Exactly one source frame, whatever the container claims to hold.
         parts.append("trim=start_frame=0:end_frame=1")
         parts.append("setpts=PTS-STARTPTS")
-        parts.append(cover_scale(width * SUPERSAMPLE, height * SUPERSAMPLE))
+        parts.append(cover_scale(width * SUPERSAMPLE, height * SUPERSAMPLE, focus, aspect))
         parts.append(
             f"zoompan=z='{zoom_expression}':x='{x_expression}':y='{y_expression}':"
             f"d={frames}:s={width}x{height}:fps={fps}"
@@ -592,3 +650,127 @@ def music_start_for(grid: BeatGrid) -> float:
     starting the track on its first strong beat is what makes those cuts land.
     """
     return max(0.0, grid.offset)
+
+
+# --------------------------------------------------------------------------
+# Contact sheets
+# --------------------------------------------------------------------------
+
+def contact_sheet_command(
+    board: Storyboard,
+    preset: Preset,
+    output: Path,
+    binaries: ff.Binaries,
+    thumb_width: int = 270,
+    columns: int = 0,
+    font: str | None = None,
+) -> list[str]:
+    """Build an ffmpeg command that tiles one frame per shot into a grid.
+
+    A full render takes the better part of a minute; deciding whether a board
+    is worth rendering takes one look. Every thumbnail goes through the same
+    crop and grade the video would use, so what the sheet shows is what the
+    video will contain.
+    """
+    if not board.shots:
+        raise RenderError("storyboard has no shots to preview")
+
+    count = len(board.shots)
+    grid_columns = columns or min(5, count)
+    grid_rows = math.ceil(count / grid_columns)
+    thumb_height = int(round(thumb_width * board.height / board.width))
+
+    command = [binaries.ffmpeg, "-hide_banner", "-nostdin", "-y"]
+    for shot in board.shots:
+        if shot.is_video:
+            seek = shot.source_in + shot.visible / 2.0
+            command += ["-ss", _time(max(0.0, seek)), "-i", shot.asset.path]
+        else:
+            command += ["-i", shot.asset.path]
+
+    segments: list[str] = []
+    for index, shot in enumerate(board.shots):
+        parts = [
+            "trim=start_frame=0:end_frame=1",
+            "setpts=PTS-STARTPTS",
+            cover_scale(thumb_width, thumb_height, shot.asset.focus, shot.asset.aspect),
+        ]
+        parts.extend(grade_filters(preset.grade))
+        if font:
+            parts.append(
+                "drawtext="
+                + ":".join(
+                    [
+                        f"fontfile='{escape_filter_path(font)}'",
+                        f"text='{index + 1}'",
+                        f"fontsize={max(14, thumb_width // 12)}",
+                        "fontcolor=white",
+                        "box=1",
+                        "boxcolor=0x000000@0.55",
+                        "boxborderw=8",
+                        "x=12",
+                        "y=12",
+                    ]
+                )
+            )
+        parts.append("setsar=1")
+        parts.append("format=rgb24")
+        segments.append(f"[{index}:v]{','.join(parts)}[t{index}]")
+
+    # Pad the last row so tile always receives a full grid.
+    blanks = grid_columns * grid_rows - count
+    labels = [f"[t{index}]" for index in range(count)]
+    if blanks:
+        segments.append(
+            f"color=c=0x101010:s={thumb_width}x{thumb_height}:d=1,"
+            f"trim=end_frame=1,setsar=1,format=rgb24[blank]"
+        )
+        if blanks > 1:
+            segments.append(
+                "[blank]split=" + str(blanks)
+                + "".join(f"[b{index}]" for index in range(blanks))
+            )
+            labels.extend(f"[b{index}]" for index in range(blanks))
+        else:
+            labels.append("[blank]")
+
+    segments.append(
+        "".join(labels)
+        + f"concat=n={len(labels)}:v=1:a=0,"
+        + f"tile={grid_columns}x{grid_rows}:padding=6:margin=10:color=0x101010[sheet]"
+    )
+
+    command += [
+        "-filter_complex", ";".join(segments),
+        "-map", "[sheet]",
+        "-frames:v", "1",
+        str(output),
+    ]
+    return command
+
+
+def contact_sheet(
+    board: Storyboard,
+    preset: Preset,
+    output: Path,
+    binaries: ff.Binaries | None = None,
+    thumb_width: int = 270,
+    columns: int = 0,
+    dry_run: bool = False,
+    timeout: float = 300.0,
+) -> Path:
+    """Render a contact sheet of the board and return its path."""
+    binaries = binaries or ff.find_binaries()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    command = contact_sheet_command(
+        board, preset, output, binaries,
+        thumb_width=thumb_width, columns=columns,
+        font=ff.find_font(preset.typography.fonts),
+    )
+    if not dry_run:
+        try:
+            ff.run(command, timeout=timeout)
+        except ff.FFmpegError as exc:
+            raise RenderError(f"contact sheet failed for {output.name}:\n{exc}") from exc
+    return output
+

@@ -210,6 +210,63 @@ def _safe_float(value: object) -> float:
         return 0.0
 
 
+@dataclass
+class Frame:
+    """One decoded thumbnail: raw RGB pixels plus the shape they form.
+
+    The shape matters. Palette extraction only needs the pixels, but deciding
+    where to crop a landscape frame needs to know which pixel sat where, so
+    the sample preserves the source aspect ratio rather than squashing it to
+    a square.
+    """
+
+    pixels: list[tuple[int, int, int]]
+    columns: int
+    rows: int
+
+    def at(self, column: int, row: int) -> tuple[int, int, int]:
+        """The pixel at *column*, *row*."""
+        return self.pixels[row * self.columns + column]
+
+    @property
+    def valid(self) -> bool:
+        """True when the buffer actually holds the shape it claims."""
+        return (
+            self.columns > 0
+            and self.rows > 0
+            and len(self.pixels) >= self.columns * self.rows
+        )
+
+
+def sample_frames(
+    binaries: Binaries,
+    path: Path,
+    kind: str,
+    width: int = 64,
+    frames: int = 3,
+    duration: float = 0.0,
+    timeout: float = 120.0,
+) -> list[Frame]:
+    """Decode *path* to a handful of small, aspect-correct RGB thumbnails.
+
+    Images yield one frame. Videos are sampled at *frames* evenly spaced seek
+    points, so a clip that changes partway through is not judged on its opening
+    frame alone. One decode serves both palette extraction and crop analysis.
+    """
+    seeks: list[float | None] = [None] if kind == "image" else _seek_points(duration, frames)
+    result: list[Frame] = []
+    for seek in seeks:
+        try:
+            frame = _sample_once(binaries, path, width, seek=seek, timeout=timeout)
+        except FFmpegError:
+            # A seek past a truncated tail is not worth failing the whole scan.
+            log.debug("sample failed at %.2fs in %s", seek or 0.0, path)
+            continue
+        if frame.valid:
+            result.append(frame)
+    return result
+
+
 def sample_pixels(
     binaries: Binaries,
     path: Path,
@@ -219,23 +276,12 @@ def sample_pixels(
     duration: float = 0.0,
     timeout: float = 120.0,
 ) -> list[tuple[int, int, int]]:
-    """Decode *path* down to a small RGB grid and return the raw pixels.
-
-    Images yield one ``grid x grid`` sample. Videos are sampled at *frames*
-    evenly spaced seek points so a clip that changes colour partway through is
-    not judged on its opening frame alone.
-    """
-    if kind == "image":
-        return _sample_once(binaries, path, grid, seek=None, timeout=timeout)
-
-    seeks = _seek_points(duration, frames)
+    """Every pixel from :func:`sample_frames`, flattened, for palette work."""
     pixels: list[tuple[int, int, int]] = []
-    for seek in seeks:
-        try:
-            pixels.extend(_sample_once(binaries, path, grid, seek=seek, timeout=timeout))
-        except FFmpegError:
-            # A seek past a truncated tail is not worth failing the whole scan.
-            log.debug("sample failed at %.2fs in %s", seek or 0.0, path)
+    for frame in sample_frames(
+        binaries, path, kind, width=grid, frames=frames, duration=duration, timeout=timeout
+    ):
+        pixels.extend(frame.pixels)
     return pixels
 
 
@@ -252,11 +298,15 @@ def _seek_points(duration: float, frames: int) -> list[float | None]:
 def _sample_once(
     binaries: Binaries,
     path: Path,
-    grid: int,
+    width: int,
     seek: float | None,
     timeout: float,
-) -> list[tuple[int, int, int]]:
-    """Decode a single frame to a ``grid x grid`` raw RGB buffer."""
+) -> Frame:
+    """Decode a single frame to a small aspect-correct raw RGB buffer.
+
+    ``scale=W:-2`` keeps the source proportions and guarantees an even height,
+    which the rgb24 unpacking below relies on to reshape the buffer.
+    """
     command = [binaries.ffmpeg, "-v", "error", "-nostdin"]
     if seek is not None:
         command += ["-ss", f"{seek:.3f}"]
@@ -264,13 +314,15 @@ def _sample_once(
         "-i", str(path),
         "-map", "0:v:0",
         "-frames:v", "1",
-        "-vf", f"scale={grid}:{grid}:flags=area,format=rgb24",
+        "-vf", f"scale={width}:-2:flags=area,format=rgb24",
         "-f", "rawvideo",
         "-pix_fmt", "rgb24",
         "-",
     ]
     result = run(command, timeout=timeout)
-    return _unpack_rgb(result.stdout)
+    pixels = _unpack_rgb(result.stdout)
+    rows = len(pixels) // width if width else 0
+    return Frame(pixels=pixels[: width * rows], columns=width, rows=rows)
 
 
 def _unpack_rgb(buffer: bytes) -> list[tuple[int, int, int]]:

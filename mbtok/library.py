@@ -17,17 +17,22 @@ from typing import Callable, Iterator, Sequence
 
 from . import ffmpeg as ff
 from .color import Palette, analyze
-from .util import expand, fingerprint, read_json, state_dir, write_json
+from .crop import Focus, focus_for
+from .util import dedupe, expand, fingerprint, read_json, state_dir, write_json
 
 log = logging.getLogger("mbtok.library")
 
 #: Index format version. Bumping it forces a full re-analysis on next scan.
-INDEX_VERSION = 3
+INDEX_VERSION = 4
 
 #: Folders that are never worth walking into.
 SKIP_DIRECTORIES = {
     ".git", ".svn", "node_modules", "__pycache__", ".mbtok", "Library",
     ".Trash", ".cache", "venv", ".venv", "renders", "out",
+    # Inside a Photos library package: everything except the originals is a
+    # derivative, a thumbnail or a database, and indexing any of it would fill
+    # the library with low-resolution duplicates of photos already indexed.
+    "derivatives", "resources", "database", "private", "external",
 }
 
 #: Filename fragments that mark a file as a preview, proxy or thumbnail rather
@@ -56,6 +61,8 @@ class Asset:
     created: str | None = None
     source: str = "local"
     palette: Palette = field(default_factory=Palette)
+    #: Where the interesting part of the frame sits, for content-aware cropping.
+    focus: Focus = field(default_factory=Focus)
     quality: float = 0.0
     error: str | None = None
 
@@ -106,6 +113,7 @@ class Asset:
             "created": self.created,
             "source": self.source,
             "palette": self.palette.to_dict(),
+            "focus": self.focus.to_dict(),
             "quality": round(self.quality, 4),
             "error": self.error,
         }
@@ -128,6 +136,7 @@ class Asset:
             created=data.get("created"),
             source=data.get("source", "local"),
             palette=Palette.from_dict(data.get("palette", {})),
+            focus=Focus.from_dict(data.get("focus")),
             quality=float(data.get("quality", 0.0)),
             error=data.get("error"),
         )
@@ -296,18 +305,22 @@ def analyze_file(
         return asset
 
     try:
-        pixels = ff.sample_pixels(
-            binaries, path, kind, grid=grid, frames=video_frames, duration=asset.duration
+        frames = ff.sample_frames(
+            binaries, path, kind, width=grid, frames=video_frames, duration=asset.duration
         )
     except ff.FFmpegError as exc:
         asset.error = str(exc).splitlines()[0][:200]
         return asset
 
+    pixels = [pixel for frame in frames for pixel in frame.pixels]
     if not pixels:
         asset.error = "no pixels decoded"
         return asset
 
     asset.palette = analyze(pixels)
+    # One decode serves both jobs: the colours it is made of, and where in the
+    # frame the interesting part sits.
+    asset.focus = focus_for(frames)
     asset.quality = quality_score(info, kind, asset.palette)
     return asset
 
@@ -515,19 +528,45 @@ def advice_for(extension: str) -> str:
     )
 
 
-def default_roots() -> list[Path]:
-    """Folders worth scanning on a Mac when the user names none.
+def photos_library_roots(home: Path | None = None) -> list[Path]:
+    """The ``originals`` folder inside each macOS Photos library.
 
-    Deliberately excludes the Photos library package, which needs an export
-    step before ffmpeg can read the originals.
+    Most of a Mac's photographs live inside a ``.photoslibrary`` package rather
+    than loose in Pictures. The full-resolution files sit in ``originals`` and
+    are ordinary readable files, so they can be indexed in place with no export
+    step. Everything else in the package is thumbnails and databases, which
+    :data:`SKIP_DIRECTORIES` prunes.
+
+    They are usually HEIC. If your ffmpeg was built without HEIC support the
+    scan will say so, per :func:`advice_for`.
     """
-    home = Path.home()
+    base = (home or Path.home()) / "Pictures"
+    if not base.is_dir():
+        return []
+    roots: list[Path] = []
+    try:
+        packages = sorted(base.glob("*.photoslibrary"))
+    except OSError:
+        return []
+    for package in packages:
+        originals = package / "originals"
+        if originals.is_dir():
+            roots.append(originals)
+    return roots
+
+
+def default_roots(home: Path | None = None) -> list[Path]:
+    """Folders worth scanning on a Mac when the user names none."""
+    base = home or Path.home()
     candidates = [
-        home / "Downloads",
-        home / "Pictures",
-        home / "Movies",
-        home / "Desktop",
-        home / "Documents" / "Envato",
-        home / "Downloads" / "Envato Elements",
+        base / "Downloads",
+        base / "Pictures",
+        base / "Movies",
+        base / "Desktop",
+        base / "Documents" / "Envato",
+        base / "Downloads" / "Envato Elements",
     ]
-    return [path for path in candidates if path.is_dir()]
+    roots = [path for path in candidates if path.is_dir()]
+    # Pictures is already listed, but the walk skips nothing about a package
+    # name, so name the originals folder explicitly to be sure it is reached.
+    return dedupe(roots + photos_library_roots(base))

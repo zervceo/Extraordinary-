@@ -301,3 +301,78 @@ def test_shell_string_is_quoted(tmp_path):
     _, _, plan = plan_for(tmp_path)
     assert "filter_complex" in plan.shell
     assert plan.shell.count("'") >= 2
+
+
+# -- contact sheets -------------------------------------------------------
+
+def test_contact_sheet_has_one_input_per_shot(tmp_path):
+    """Every shot contributes exactly one thumbnail."""
+    preset, board = build_board(shots=7)
+    command = render.contact_sheet_command(
+        board, preset, tmp_path / "sheet.png", BINARIES, font=None
+    )
+    assert command.count("-i") == len(board.shots)
+    graph = command[command.index("-filter_complex") + 1]
+    for index in range(len(board.shots)):
+        assert f"[{index}:v]" in graph
+
+
+def test_contact_sheet_grid_covers_every_thumbnail(tmp_path):
+    """The tile grid is always large enough, padded with blanks if needed."""
+    for count in (3, 5, 7, 9, 12):
+        preset, board = build_board(shots=count)
+        command = render.contact_sheet_command(
+            board, preset, tmp_path / "s.png", BINARIES, columns=5, font=None
+        )
+        graph = command[command.index("-filter_complex") + 1]
+        match = re.search(r"concat=n=(\d+):v=1:a=0,tile=(\d+)x(\d+)", graph)
+        assert match, graph[-200:]
+        concat, columns, rows = (int(match.group(i)) for i in (1, 2, 3))
+        assert columns * rows >= count
+        assert concat == columns * rows
+
+
+def test_contact_sheet_uses_the_same_crop_as_the_video(tmp_path):
+    """A thumbnail shows the framing the render would actually produce."""
+    from mbtok.crop import Focus
+
+    preset, board = build_board(shots=4)
+    for shot in board.shots:
+        shot.asset.width, shot.asset.height = 1920, 1080
+        shot.asset.focus = Focus(x=0.2, confidence=0.9)
+    command = render.contact_sheet_command(
+        board, preset, tmp_path / "s.png", BINARIES, font=None
+    )
+    graph = command[command.index("-filter_complex") + 1]
+    assert "crop=270:480:x=(iw-ow)*" in graph
+
+
+def test_contact_sheet_applies_the_grade(tmp_path):
+    """The sheet is graded, so it previews the look and not just the shots."""
+    preset, board = build_board(key="tokyo-night", shots=4)
+    command = render.contact_sheet_command(
+        board, preset, tmp_path / "s.png", BINARIES, font=None
+    )
+    graph = command[command.index("-filter_complex") + 1]
+    assert "eq=" in graph and "colorbalance=" in graph
+
+
+def test_contact_sheet_numbers_shots_when_a_font_exists(tmp_path):
+    """Thumbnails are numbered so the shot list lines up with the picture."""
+    preset, board = build_board(shots=4)
+    with_font = render.contact_sheet_command(
+        board, preset, tmp_path / "s.png", BINARIES, font="/fake/font.ttf"
+    )
+    without = render.contact_sheet_command(
+        board, preset, tmp_path / "s.png", BINARIES, font=None
+    )
+    assert "drawtext" in with_font[with_font.index("-filter_complex") + 1]
+    assert "drawtext" not in without[without.index("-filter_complex") + 1]
+
+
+def test_contact_sheet_needs_shots(tmp_path):
+    """An empty board is refused rather than producing a blank sheet."""
+    preset = presets.get("clean-girl")
+    board = storyboard.Storyboard(preset_key=preset.key)
+    with pytest.raises(render.RenderError):
+        render.contact_sheet_command(board, preset, tmp_path / "s.png", BINARIES)

@@ -148,7 +148,9 @@ def test_rendered_frames_are_not_blank(media, tmp_path):
 
     samples = []
     for moment in (0.4, 2.0, 3.4):
-        pixels = ff._sample_once(BINARIES, result.bundle.output, 32, seek=moment, timeout=60)
+        pixels = ff._sample_once(
+            BINARIES, result.bundle.output, 32, seek=moment, timeout=60
+        ).pixels
         assert pixels
         average = sum(sum(pixel) for pixel in pixels) / (len(pixels) * 3)
         samples.append(average)
@@ -227,3 +229,62 @@ def test_doctor_reports_a_healthy_project(media, tmp_path):
     assert main(["--project", str(tmp_path), "init", str(media / "lib")]) == 0
     assert main(["--project", str(tmp_path), "--quiet", "scan"]) == 0
     assert main(["--project", str(tmp_path), "doctor"]) == 0
+
+
+@needs_ffmpeg
+def test_preview_renders_a_contact_sheet(media, tmp_path):
+    """A preview produces a real image and consumes no footage."""
+    library = library_mod.scan([media / "lib"], project_root=tmp_path, workers=4)
+    library.save(tmp_path)
+    config = Config(output_dir=str(tmp_path / "out"))
+    request = pipeline.MakeRequest(preset_key="clean-girl", duration=8.0, bpm=104.0, shots=6)
+    sheet = tmp_path / "out" / "sheet.png"
+
+    path, bundle = pipeline.preview(library, config, request, sheet, project_root=tmp_path)
+    assert path.exists() and path.stat().st_size > 1000
+    assert len(bundle.board.shots) == 6
+
+    data = probe(path)
+    image = streams_of(data, "video")[0]
+    assert image["width"] > 270 and image["height"] > 480
+
+    # Previewing must not burn the footage it showed.
+    from mbtok.ledger import Ledger
+    assert Ledger.load(tmp_path).posts == []
+
+
+@needs_ffmpeg
+def test_content_aware_crop_keeps_an_off_centre_subject(media, tmp_path):
+    """A landscape frame is cropped toward its subject, not its middle."""
+    from mbtok import crop
+    from mbtok.render import cover_scale
+
+    source = tmp_path / "wide.jpg"
+    subject_x = 220
+    subprocess.run(
+        [BINARIES.ffmpeg, "-v", "error", "-y", "-f", "lavfi",
+         "-i", "gradients=s=1920x1080:c0=0xbfd4e8:c1=0xe8e0d2:d=1", "-frames:v", "1",
+         "-vf", (f"drawbox=x={subject_x}:y=300:w=400:h=500:color=0xC04030:t=fill,"
+                 f"drawbox=x={subject_x + 60}:y=360:w=90:h=380:color=0x2a5f8a:t=fill"),
+         str(source)],
+        check=True,
+    )
+
+    focus = crop.focus_for(ff.sample_frames(BINARIES, source, "image", width=64))
+    assert focus.x < 0.4, "the subject sits on the left third"
+    assert focus.confidence > 0.2
+
+    def redness(chain: str) -> float:
+        out = tmp_path / "crop.png"
+        subprocess.run(
+            [BINARIES.ffmpeg, "-v", "error", "-y", "-i", str(source),
+             "-vf", chain, "-frames:v", "1", str(out)],
+            check=True,
+        )
+        pixels = ff._sample_once(BINARIES, out, 32, seek=None, timeout=60).pixels
+        return sum(1 for r, g, b in pixels if r > g + 40 and r > b + 40) / len(pixels)
+
+    smart = redness(cover_scale(1080, 1920, focus, 1920 / 1080))
+    centred = redness(cover_scale(1080, 1920))
+    assert smart > centred, "the content-aware crop should retain more of the subject"
+    assert centred < 0.02, "a centred crop loses this subject entirely"

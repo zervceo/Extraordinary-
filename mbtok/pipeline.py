@@ -283,3 +283,58 @@ def _metadata(preset: Preset, slug: str) -> dict[str, str]:
         ),
         "encoder": "mbtok",
     }
+
+
+def preview(
+    library: Library,
+    config: Config,
+    request: MakeRequest,
+    output: Path,
+    project_root: Path | str = ".",
+    ledger: Ledger | None = None,
+    binaries: ff.Binaries | None = None,
+    thumb_width: int = 270,
+) -> tuple[Path, report.PostBundle]:
+    """Build a board and render a contact sheet of it, without encoding video.
+
+    Uses exactly the same curation and storyboard the real render would, so a
+    sheet that looks right predicts a video that looks right. Nothing is
+    recorded in the ledger: previewing a board must not consume its footage.
+    """
+    binaries = binaries or ff.find_binaries()
+    preset = presets.get(request.preset_key)
+    ledger = Ledger.load(project_root) if ledger is None else ledger
+
+    slug = request.slug or default_slug(preset)
+    seed = request.seed if request.seed is not None else _seed_from(slug)
+    grid = audio_mod.fixed_grid(request.bpm or 100.0, duration=request.duration)
+
+    shot_count = request.shots or storyboard.suggest_shot_count(preset, grid, request.duration)
+    selection, selection_report = curate.select(
+        library.usable,
+        preset,
+        shot_count,
+        exclude=sorted(ledger.cooling(config.cooldown_days)),
+        min_quality=config.min_quality,
+        diversity=config.diversity,
+    )
+    if not selection:
+        raise PipelineError(
+            f"no assets matched the '{preset.key}' mood. "
+            + " ".join(selection_report.warnings)
+        )
+
+    selection = curate.order_shots(selection)
+    copy = captions_mod.write(preset, slug)
+    board = storyboard.build(
+        selection, preset, grid, request.duration,
+        fps=config.fps, width=config.width, height=config.height, seed=seed,
+    )
+    render.contact_sheet(board, preset, output, binaries, thumb_width=thumb_width)
+
+    bundle = report.PostBundle(
+        slug=slug, preset=preset, board=board, copy=copy, output=output,
+        selection_report=selection_report,
+    )
+    return (output, bundle)
+

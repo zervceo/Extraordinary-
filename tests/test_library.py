@@ -229,3 +229,41 @@ def test_known_formats_get_specific_advice():
     """HEIC failures name the actual fix rather than a generic message."""
     assert "brew" in lib.advice_for(".HEIC")
     assert "verbose" in lib.advice_for(".mov")
+
+
+def test_photos_library_originals_are_found(tmp_path):
+    """The full-resolution folder inside a Photos package is located."""
+    package = tmp_path / "Pictures" / "Photos Library.photoslibrary"
+    (package / "originals" / "0").mkdir(parents=True)
+    (package / "resources" / "derivatives").mkdir(parents=True)
+    roots = lib.photos_library_roots(tmp_path)
+    assert roots == [package / "originals"]
+
+
+def test_photos_derivatives_are_never_indexed(tmp_path):
+    """Thumbnails inside a Photos package are pruned, originals are kept."""
+    package = tmp_path / "Pictures" / "Photos Library.photoslibrary"
+    (package / "originals" / "0").mkdir(parents=True)
+    (package / "resources" / "derivatives").mkdir(parents=True)
+    (package / "originals" / "0" / "IMG_1.heic").write_bytes(b"x")
+    (package / "resources" / "derivatives" / "IMG_1_1102.jpeg").write_bytes(b"x")
+    found = {path.name for path in lib.walk([tmp_path / "Pictures"])}
+    assert found == {"IMG_1.heic"}
+
+
+def test_default_roots_include_photos_without_duplicating(tmp_path):
+    """Photos originals are added once, alongside the ordinary folders."""
+    (tmp_path / "Downloads").mkdir()
+    package = tmp_path / "Pictures" / "Photos Library.photoslibrary"
+    (package / "originals").mkdir(parents=True)
+    roots = lib.default_roots(tmp_path)
+    assert len(roots) == len(set(roots))
+    assert package / "originals" in roots
+    assert tmp_path / "Downloads" in roots
+
+
+def test_no_photos_library_is_fine(tmp_path):
+    """A machine with no Photos library returns no extra roots."""
+    (tmp_path / "Pictures").mkdir()
+    assert lib.photos_library_roots(tmp_path) == []
+    assert lib.photos_library_roots(tmp_path / "missing") == []

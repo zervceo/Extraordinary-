@@ -2,7 +2,7 @@
 PYTHON ?= python3
 PROJECT ?= .
 
-.PHONY: help install dev test test-fast lint doctor scan boards make batch clean
+.PHONY: help install dev test test-fast doctor scan boards preview make-post batch clean
 
 help:            ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -28,6 +28,9 @@ scan:            ## Index the configured media folders
 
 boards:          ## Show which moods this library supports
 	$(PYTHON) -m mbtok --project $(PROJECT) boards
+
+preview:         ## Contact sheet of a board, without encoding video
+	$(PYTHON) -m mbtok --project $(PROJECT) preview
 
 make-post:       ## Render a single post
 	$(PYTHON) -m mbtok --project $(PROJECT) make

@@ -358,6 +358,46 @@ def _show_selection(library, config, cooling, args) -> None:
         )
 
 
+def cmd_preview(args: argparse.Namespace) -> int:
+    """Render a contact sheet of a board, without encoding a video."""
+    root = Path(args.project).resolve()
+    config = _config_with_overrides(root, args)
+    library = library_mod.Library.load(root)
+    if not library.usable:
+        OUT.fail("library is empty. Run: mbtok scan")
+        return 1
+
+    request = pipeline.MakeRequest(
+        preset_key=args.preset or config.preset,
+        duration=args.duration or config.duration,
+        bpm=args.bpm,
+        shots=args.shots,
+        slug=args.slug or "",
+        seed=args.seed,
+    )
+    output = Path(args.out) if args.out else (
+        config.resolved_output(root) / f"preview-{request.preset_key}.png"
+    )
+
+    try:
+        path, bundle = pipeline.preview(
+            library, config, request, output, project_root=root, thumb_width=args.thumb_width
+        )
+    except (pipeline.PipelineError, render.RenderError, ff.FFmpegError) as exc:
+        OUT.fail(str(exc))
+        return 1
+
+    OUT.ok(f"contact sheet: {path}")
+    OUT.dim(f"  {len(bundle.board.shots)} shots, {bundle.preset.title}")
+    for index, shot in enumerate(bundle.board.shots, start=1):
+        swatch = shot.asset.palette.hexes[0] if shot.asset.palette.swatches else "-"
+        OUT.dim(f"  {index:2}. {swatch:8} {shot.asset.name}")
+    OUT.line()
+    OUT.dim("  Happy with it?  mbtok make --preset "
+            f"{bundle.preset.key} --slug {bundle.slug}")
+    return 0
+
+
 def cmd_make(args: argparse.Namespace) -> int:
     """Render one post."""
     root = Path(args.project).resolve()
@@ -566,6 +606,17 @@ def build_parser() -> argparse.ArgumentParser:
     boards.add_argument("--shots", type=int, default=8, help="shots per board")
     boards.add_argument("--show", action="store_true", help="list the shots that would be used")
     boards.set_defaults(func=cmd_boards)
+
+    preview = subparsers.add_parser(
+        "preview", help="see a board as a contact sheet, without rendering video"
+    )
+    _add_render_arguments(preview)
+    preview.add_argument("--slug", help="name for the board")
+    preview.add_argument("--seed", type=int, help="fix the random seed")
+    preview.add_argument("--out", help="where to write the PNG")
+    preview.add_argument("--thumb-width", type=int, default=270, dest="thumb_width",
+                         help="thumbnail width in pixels")
+    preview.set_defaults(func=cmd_preview)
 
     make = subparsers.add_parser("make", help="render one post")
     _add_render_arguments(make)
