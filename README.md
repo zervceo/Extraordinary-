@@ -211,4 +211,4 @@ make test        # everything, including real ffmpeg renders
 make test-fast   # skip the ffmpeg integration tests
 ```
 
-277 tests. The integration tests build a small library of real files, render it, and probe the result — they are the ones that prove the emitted filtergraph is something ffmpeg will actually accept. They skip themselves automatically if ffmpeg is not installed.
+279 tests. The integration tests build a small library of real files, render it, and probe the result — they are the ones that prove the emitted filtergraph is something ffmpeg will actually accept. They skip themselves automatically if ffmpeg is not installed.
