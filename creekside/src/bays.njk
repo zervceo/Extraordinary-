@@ -1,0 +1,61 @@
+---
+layout: base.njk
+title: "Toptracer Bays"
+description: "Rent a Toptracer bay at Creekside. Practice, play games, take on virtual courses and track your progress. Up to six people per bay."
+permalink: /bays/
+---
+{%- from "icons.njk" import icon, btn, rates, pagehero, finalcta -%}
+{% call pagehero("Toptracer Bays", "Get a bay. Pick a game.<br>Have some fun.", "This isn't your average trip to the range. Covered bays, Toptracer on every screen, food and drinks delivered to your seat.", "Good swings optional.", "bays", "Covered Toptracer bays at Creekside") %}
+<div class="btnrow">{{ btn("Rent a Bay", "#rent", "white", "rent_a_bay:bays_hero") }}</div>
+{% endcall %}
+
+<div class="wrap section">
+  <div class="sectionhead">
+    <p class="eyebrow">What you can do</p>
+    <h2>Serious practice. Or not serious at all.</h2>
+  </div>
+  <ul class="tiles">
+    <li class="tile">{{ icon("practice") }}<h3>Practice</h3><p>See carry, ball speed, launch angle and shot shape on every swing. Work through the bag with real numbers.</p></li>
+    <li class="tile">{{ icon("games") }}<h3>Play games</h3><p>Closest to the pin, long drive, points games. Easy to learn, and fun even if you've never held a club.</p></li>
+    <li class="tile">{{ icon("flag") }}<h3>Virtual courses</h3><p>Play famous courses from around the world without leaving your bay, or losing a single ball.</p></li>
+    <li class="tile">{{ icon("trophy") }}<h3>Track your progress</h3><p>Save your sessions in the Toptracer app and watch your game get better over time.</p></li>
+  </ul>
+</div>
+
+<section class="band band--cream" id="rent" aria-labelledby="rent-title">
+  <div class="wrap twocol">
+    <div>
+      <p class="eyebrow">Rent a bay</p>
+      <h2 id="rent-title">Pick a time. Bring your people.</h2>
+      <p>Bays are rented by the hour and fit up to six, so the price is the same whether it's just you or the whole crew. Clubs are free to borrow if you don't have your own.</p>
+      <ul class="checks">
+        <li>{{ icon("check") }}Up to six people per bay</li>
+        <li>{{ icon("check") }}Covered and comfortable in most weather</li>
+        <li>{{ icon("check") }}Food and drinks delivered to your bay</li>
+        <li>{{ icon("check") }}Walk-ins welcome when bays are open</li>
+      </ul>
+      <div class="btnrow">
+        <a class="btn btn--primary btn--lg" href="tel:{{ site.phone | replace('(', '') | replace(') ', '-') }}" data-track="rent_a_bay:bays_call">Call to reserve: {{ site.phone }}</a>
+      </div>
+      <p class="fineprint">Online booking plugs in here. Set the booking link once in the CMS and every Rent a Bay button on the site points to it.</p>
+    </div>
+    <div class="ratecard">
+      <h3>Bay pricing</h3>
+      {{ rates(pricing.bays) }}
+    </div>
+  </div>
+</section>
+
+<div class="wrap section">
+  <div class="sectionhead">
+    <p class="eyebrow">Good to know</p>
+    <h2>First time? Here's how it works.</h2>
+  </div>
+  <ol class="steps">
+    <li><h3>Check in</h3><p>Reserve ahead or walk up. We'll set you up with a bay and clubs if you need them.</p></li>
+    <li><h3>Pick a mode</h3><p>Tap the screen and choose practice, a game or a course. It takes about ten seconds.</p></li>
+    <li><h3>Swing away</h3><p>Order food, keep score or don't. The hour goes faster than you think.</p></li>
+  </ol>
+</div>
+
+<div class="wrap section section--tight">{{ finalcta(site.booking_url) }}</div>

@@ -1,0 +1,10 @@
+# Creekside website (the site lives in /creekside)
+[build]
+  base = "creekside"
+  command = "npm run build"
+  publish = "_site"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

@@ -1,0 +1,17 @@
+---
+layout: base.njk
+title: "Page not found"
+permalink: /404.html
+eleventyExcludeFromCollections: true
+noindex: true
+---
+{%- from "icons.njk" import btn -%}
+<div class="wrap section center narrow messagepage">
+  <p class="eyebrow">404</p>
+  <h1>That one's in the creek.</h1>
+  <p>The page you're looking for has moved or never existed. Take a drop and try one of these.</p>
+  <div class="btnrow btnrow--center">
+    {{ btn("Rent a Bay", site.booking_url, "primary btn--lg", "rent_a_bay:404") }}
+    {{ btn("Back to Home", "/", "outline btn--lg") }}
+  </div>
+</div>

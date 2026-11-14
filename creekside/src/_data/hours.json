@@ -1,0 +1,12 @@
+{
+  "note": "Last bay rental starts one hour before close. Hours can shift with weather, so call ahead if it looks rough out.",
+  "days": [
+    { "day": "Monday", "schema": "Mo", "open": "09:00", "close": "21:00", "label": "9am – 9pm" },
+    { "day": "Tuesday", "schema": "Tu", "open": "09:00", "close": "21:00", "label": "9am – 9pm" },
+    { "day": "Wednesday", "schema": "We", "open": "09:00", "close": "21:00", "label": "9am – 9pm" },
+    { "day": "Thursday", "schema": "Th", "open": "09:00", "close": "22:00", "label": "9am – 10pm" },
+    { "day": "Friday", "schema": "Fr", "open": "09:00", "close": "22:00", "label": "9am – 10pm" },
+    { "day": "Saturday", "schema": "Sa", "open": "08:00", "close": "22:00", "label": "8am – 10pm" },
+    { "day": "Sunday", "schema": "Su", "open": "08:00", "close": "20:00", "label": "8am – 8pm" }
+  ]
+}

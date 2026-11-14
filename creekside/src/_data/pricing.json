@@ -1,0 +1,26 @@
+{
+  "bays": {
+    "note": "Each bay fits up to six people. Clubs are free to borrow.",
+    "rates": [
+      { "name": "Weekdays before 5pm", "price": "$25", "unit": "per bay / hour" },
+      { "name": "Evenings & weekends", "price": "$35", "unit": "per bay / hour" },
+      { "name": "$10 Tuesdays", "price": "$10", "unit": "any size bucket" }
+    ]
+  },
+  "minigolf": {
+    "note": "Putters and balls included. Kids 3 and under play free.",
+    "rates": [
+      { "name": "Adults", "price": "$10", "unit": "18 holes" },
+      { "name": "Kids 12 & under", "price": "$8", "unit": "18 holes" },
+      { "name": "Second round", "price": "$5", "unit": "same day" }
+    ]
+  },
+  "lessons": {
+    "note": "Packages and junior rates available. Ask Doc.",
+    "rates": [
+      { "name": "Private lesson", "price": "$60", "unit": "30 minutes" },
+      { "name": "Private lesson", "price": "$100", "unit": "60 minutes" },
+      { "name": "Group clinic", "price": "$30", "unit": "per person" }
+    ]
+  }
+}

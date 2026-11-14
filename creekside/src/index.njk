@@ -1,0 +1,154 @@
+---
+layout: base.njk
+description: "Toptracer bays, mini golf, lessons with a PGA Professional, food, drinks and events. At Creekside you don't have to be a great golfer to have a great time."
+bodyClass: home
+---
+{%- from "icons.njk" import icon, btn, finalcta -%}
+
+<section class="hero" aria-labelledby="hero-title">
+  <img class="hero__img" src="/assets/img/hero.webp" alt="A golfer mid-swing in a Creekside Toptracer bay at sunset while friends look on" width="1428" height="894" fetchpriority="high">
+  <div class="hero__inner wrap">
+    <h1 id="hero-title">Your game.<br>Your people.<br>Your kind of place.</h1>
+    <p class="hero__lead">Come hit a few, work on your swing, grab something to eat, or just hang out. At Creekside, you don't have to be a great golfer to have a great time.</p>
+    <div class="btnrow">
+      {{ btn("Rent a Bay", site.booking_url, "primary", "rent_a_bay:hero") }}
+      {{ btn("Book a Lesson", site.lesson_url, "light", "book_lesson:hero") }}
+      {{ btn("Order Food", site.order_url, "light", "order_food:hero") }}
+    </div>
+    <p class="script hero__script">Golf. Food. Fun. We mean it.</p>
+  </div>
+</section>
+
+<div class="stack wrap">
+
+  <section class="split split--navy" aria-labelledby="bays-title" data-reveal>
+    <div class="split__media"><img src="/assets/img/bays.webp" alt="Row of covered Toptracer bays with screens at each station" loading="lazy" width="848" height="406"></div>
+    <div class="split__body">
+      <div class="split__copy">
+        <p class="eyebrow eyebrow--light">Toptracer Bays</p>
+        <h2 id="bays-title">Get a bay. Pick a game.<br>Have some fun.</h2>
+        <p class="lede">This isn't your average trip to the range.</p>
+        <p>Dial in your distances. Work through the bag. Challenge your friends. Play a virtual course. Or completely ignore your score and just see who can hit it the farthest.</p>
+        <div class="btnrow btnrow--script">
+          {{ btn("Rent a Bay", site.booking_url, "white", "rent_a_bay:home_bays") }}
+          <p class="script script--light">Good swings optional.</p>
+        </div>
+      </div>
+      <ul class="features" aria-label="What you can do in a bay">
+        <li>{{ icon("practice") }}<span>Practice</span></li>
+        <li>{{ icon("games") }}<span>Play games</span></li>
+        <li>{{ icon("flag") }}<span>Virtual courses</span></li>
+        <li>{{ icon("trophy") }}<span>Track your progress</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="split split--cream split--flip" aria-labelledby="mg-title" data-reveal>
+    <div class="split__media"><img src="/assets/img/minigolf.webp" alt="A family playing mini golf on the landscaped Creekside course" loading="lazy" width="1050" height="490"></div>
+    <div class="split__body">
+      <div class="split__copy">
+        <p class="eyebrow">Mini Golf</p>
+        <h2 id="mg-title">Wait… Creekside has mini golf?</h2>
+        <p class="lede">We sure do.</p>
+        <p>{{ minigolf.intro }}</p>
+        <p>Our mini golf course is an easy way to spend some time outside, have a little friendly competition, and enjoy Creekside even if swinging a driver isn't your thing.</p>
+        <p>No tee time. No handicap. No experience required.</p>
+        <div class="btnrow btnrow--script">
+          {{ btn("Discover Mini Golf", "/mini-golf/", "primary", "discover_mini_golf:home") }}
+          <p class="script">It’s harder than it looks. You’ve been warned.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="pair">
+    <section class="card card--white" aria-labelledby="lessons-title" data-reveal>
+      <img class="card__img" src="/assets/img/lessons.webp" alt="PGA Professional Doc Greenlee coaching a student on the range" loading="lazy" width="414" height="444">
+      <div class="card__body">
+        <p class="eyebrow">Lessons</p>
+        <h2 id="lessons-title">Work on your game.</h2>
+        <p class="lede">Sometimes another set of eyes is all it takes.</p>
+        <p>Whether you're new to golf, chasing a lower score, or just trying to figure out where that slice came from, a lesson can help.</p>
+        <p>Get personalized instruction with PGA Professional Doc Greenlee in a relaxed environment built for actually enjoying the process.</p>
+        <div class="btnrow">
+          {{ btn("Meet Doc", "/lessons/", "primary btn--sm", "meet_doc:home") }}
+          {{ btn("Book a Lesson", site.lesson_url, "outline btn--sm", "book_lesson:home") }}
+        </div>
+        <p class="script card__script">It’s golf. Buddies have enough opinions.</p>
+      </div>
+    </section>
+
+    <section class="card card--cream" aria-labelledby="food-title" data-reveal>
+      <img class="card__img" src="/assets/img/food.webp" alt="A bacon cheeseburger with fries and a cold draft beer" loading="lazy" width="374" height="444">
+      <div class="card__body">
+        <p class="eyebrow">Food</p>
+        <h2 id="food-title">Come hungry.</h2>
+        <p class="lede">Because golf is better with food.</p>
+        <p>You don't have to leave when you're hungry. Grab a bite between buckets, order something for the bay, or stop in just because you're craving something good.</p>
+        <p>Golf is encouraged. Hunger is not.</p>
+        <div class="btnrow">
+          {{ btn("View the Menu", "/food/", "primary btn--sm", "view_menu:home") }}
+          {{ btn("Order Food", site.order_url, "outline btn--sm", "order_food:home") }}
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="pair pair--events">
+    <section class="happening" aria-labelledby="happening-title" data-reveal>
+      <header class="happening__head">
+        <h2 id="happening-title">There's always something going on.</h2>
+        <p>Some days, we're the ones making the plans. Other days, you are.</p>
+      </header>
+      <div class="happening__grid">
+        <div class="panel">
+          <h3 class="panel__title">What's happening at Creekside</h3>
+          <ul class="iconlist">
+            {%- for e in collections.happenings | featured %}
+            <li>{{ icon(e.data.icon) }}<div><h4>{{ e.data.title }}</h4><p>{{ e.data.summary }}</p></div></li>
+            {%- endfor %}
+          </ul>
+          <div class="btnrow btnrow--script">
+            {{ btn("See What's Happening", "/events/#whats-happening", "outline btn--sm", "see_whats_happening:home") }}
+            <p class="script">More good times ahead.</p>
+          </div>
+        </div>
+        <img class="happening__img" src="/assets/img/cheers.webp" alt="Friends toasting with drinks at Creekside" loading="lazy" width="370" height="448">
+      </div>
+    </section>
+
+    <section class="yourevent" aria-labelledby="yourevent-title" data-reveal>
+      <div class="yourevent__body">
+        <h2 id="yourevent-title">Your event. Our place.</h2>
+        <p class="yourevent__sub">Need somewhere a little more fun than the usual four walls?</p>
+        <div class="panel">
+          <ul class="iconlist">
+            {%- for p in privateEvents %}
+            <li>{{ icon(p.icon) }}<div><h3>{{ p.title }}</h3><p>{{ p.summary }}</p></div></li>
+            {%- endfor %}
+          </ul>
+          <div class="btnrow btnrow--script">
+            {{ btn("Plan an Event", "/events/#plan", "primary btn--sm", "plan_event:home") }}
+            <p class="script">You bring the people. We’ll help with the fun.</p>
+          </div>
+        </div>
+      </div>
+      <img class="yourevent__img" src="/assets/img/tent.webp" alt="The Creekside event tent set with tables and string lights" loading="lazy" width="288" height="554">
+    </section>
+  </div>
+
+  <div class="pair pair--close">
+    <section class="card card--white card--new" aria-labelledby="new-title" data-reveal>
+      <img class="card__img" src="/assets/img/sign.webp" alt="Wooden sign reading: All are welcome. Good golf, good food, good people, brighter days" loading="lazy" width="382" height="360">
+      <div class="card__body">
+        <p class="eyebrow">New to Creekside?</p>
+        <h2 id="new-title">Don't overthink it.</h2>
+        <p>You don't need the latest clubs.<br>You don't need a single-digit handicap.<br>You definitely don't need a perfect swing.</p>
+        <p>Bring some friends. Rent a bay. We'll take it from there.</p>
+        <div class="btnrow">{{ btn("Plan Your Visit", "/visit/", "primary btn--sm", "plan_visit:home") }}</div>
+      </div>
+    </section>
+    {{ finalcta(site.booking_url) }}
+  </div>
+
+</div>

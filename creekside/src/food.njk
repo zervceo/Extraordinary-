@@ -1,0 +1,43 @@
+---
+layout: base.njk
+title: "Food & Drinks"
+description: "Burgers, shareables, cold drinks and more at Creekside. Eat in, order to your bay, or stop by just because you're hungry."
+permalink: /food/
+---
+{%- from "icons.njk" import icon, btn, pagehero, finalcta -%}
+{% call pagehero("Food", "Come hungry.", "Because golf is better with food. Grab a bite between buckets, order something for the bay, or stop in just because you're craving something good.", "Golf is encouraged. Hunger is not.", "food", "A Creekside burger with fries and a draft beer") %}
+<div class="btnrow">{{ btn("Order Food", "#order", "white", "order_food:food_hero") }}</div>
+{% endcall %}
+
+<div class="wrap section" id="menu">
+  <div class="sectionhead">
+    <p class="eyebrow">The menu</p>
+    <h2>Good food. Cold drinks.</h2>
+  </div>
+  <div class="menu">
+    {%- for s in menu.sections %}
+    <section class="menu__section" aria-labelledby="menu-{{ loop.index }}">
+      <h3 id="menu-{{ loop.index }}">{{ s.name }}</h3>
+      <ul>
+        {%- for i in s.items %}
+        <li><div class="menu__row"><span class="menu__name">{{ i.name }}</span><span class="rates__dots" aria-hidden="true"></span><span class="menu__price">{{ i.price }}</span></div>{% if i.description %}<p>{{ i.description }}</p>{% endif %}</li>
+        {%- endfor %}
+      </ul>
+    </section>
+    {%- endfor %}
+  </div>
+  {% if menu.note %}<p class="fineprint center">{{ menu.note }}</p>{% endif %}
+</div>
+
+<section class="band band--navy" id="order" aria-labelledby="order-title">
+  <div class="wrap center narrow">
+    <p class="eyebrow eyebrow--light">Order food</p>
+    <h2 id="order-title">Eat in, take out, or have it brought to your bay.</h2>
+    <p>Order at the counter, from your bay, or call ahead and we'll have it ready when you get here.</p>
+    <div class="btnrow btnrow--center">
+      <a class="btn btn--white btn--lg" href="tel:{{ site.phone | replace('(', '') | replace(') ', '-') }}" data-track="order_food:food_call">Call in an order: {{ site.phone }}</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap section section--tight">{{ finalcta(site.booking_url, "Food's better with a bay.", "Order from your seat.") }}</div>

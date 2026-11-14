@@ -1,0 +1,33 @@
+# Permanent (301) redirects from the old site's URLs to the new structure.
+# Format: /old-path  /new-path  301
+# These cover common legacy paths. Before launch, crawl the live site and
+# add a line for every existing URL that is changing.
+/driving-range        /bays/        301
+/driving-range/*      /bays/        301
+/range                /bays/        301
+/toptracer            /bays/        301
+/toptracer-range      /bays/        301
+/miniature-golf       /mini-golf/   301
+/minigolf             /mini-golf/   301
+/putt-putt            /mini-golf/   301
+/instruction          /lessons/     301
+/golf-lessons         /lessons/     301
+/lessons/doc-greenlee /lessons/     301
+/menu                 /food/        301
+/restaurant           /food/        301
+/grill                /food/        301
+/calendar             /events/      301
+/specials             /events/      301
+/parties              /events/#your-event  301
+/birthday-parties     /events/#your-event  301
+/private-events       /events/#your-event  301
+/corporate-events     /events/#your-event  301
+/tent-rental          /events/#your-event  301
+/contact              /visit/       301
+/contact-us           /visit/       301
+/hours                /visit/#hours 301
+/directions           /visit/       301
+/rates                /visit/#pricing 301
+/pricing              /visit/#pricing 301
+/about                /visit/       301
+/about-us             /visit/       301

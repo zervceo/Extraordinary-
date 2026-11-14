@@ -1,0 +1,20 @@
+[
+  {
+    "icon": "cake",
+    "title": "Birthday Parties",
+    "summary": "Mini golf, food, games, and plenty of room to celebrate.",
+    "detail": "Kid parties, milestone birthdays and everything in between. Pick mini golf, bays or both, add food, and let us handle the setup and cleanup."
+  },
+  {
+    "icon": "team",
+    "title": "Corporate Outings & Retreats",
+    "summary": "Skip the conference room. Bring the team out for golf, food, friendly competition, or a little of everything.",
+    "detail": "Team building that people actually want to attend. Reserve a block of Toptracer bays, run a closest-to-the-pin contest, and feed everyone without anyone touching a slide deck."
+  },
+  {
+    "icon": "tent",
+    "title": "Tent Rentals & Private Gatherings",
+    "summary": "Our tent gives you space to make Creekside your own for celebrations, company events, family gatherings, and more.",
+    "detail": "A covered, flexible space with room for tables, catering and a crowd. Showers, reunions, fundraisers, team banquets. If you can picture it, we can probably host it."
+  }
+]

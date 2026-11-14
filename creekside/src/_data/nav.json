@@ -1,0 +1,8 @@
+[
+  { "label": "Bays", "url": "/bays/" },
+  { "label": "Mini Golf", "url": "/mini-golf/" },
+  { "label": "Lessons", "url": "/lessons/" },
+  { "label": "Food", "url": "/food/" },
+  { "label": "Events", "url": "/events/" },
+  { "label": "Visit", "url": "/visit/" }
+]

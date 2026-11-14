@@ -1,0 +1,45 @@
+---
+layout: base.njk
+title: "Golf Lessons with Doc Greenlee"
+description: "Private lessons and clinics with PGA Professional Doc Greenlee at Creekside. Relaxed, personalized instruction for every level."
+permalink: /lessons/
+---
+{%- from "icons.njk" import icon, btn, rates, pagehero, finalcta -%}
+{% call pagehero("Lessons", "Work on your game.", "Sometimes another set of eyes is all it takes. Personalized instruction with PGA Professional Doc Greenlee, in a relaxed environment built for actually enjoying the process.", "It's golf. Buddies have enough opinions.", "lessons", "Doc Greenlee coaching a student on the range") %}
+<div class="btnrow">{{ btn("Book a Lesson", "#book", "white", "book_lesson:lessons_hero") }}</div>
+{% endcall %}
+
+<div class="wrap section twocol twocol--top">
+  <div>
+    <p class="eyebrow">Meet Doc</p>
+    <h2>Doc Greenlee, PGA Professional</h2>
+    <p>Doc has a simple philosophy: golf is supposed to be fun, and you get better faster when it is. No jargon, no rebuilding your swing from scratch, no judgment about the clubs you inherited from your uncle.</p>
+    <p>Lessons happen right in the Toptracer bays, so you'll see real data on every shot and leave knowing exactly what to work on.</p>
+    <p class="script">Bring your slice. Doc’s seen worse.</p>
+  </div>
+  <ul class="tiles tiles--stack">
+    <li class="tile"><h3>New to golf</h3><p>Grip, stance, contact. The basics, minus the intimidation.</p></li>
+    <li class="tile"><h3>Chasing a lower score</h3><p>Find the strokes you're leaving out there and a plan to get them back.</p></li>
+    <li class="tile"><h3>Juniors & groups</h3><p>Clinics and small-group sessions for kids, friends and teams.</p></li>
+  </ul>
+</div>
+
+<section class="band band--cream" id="book" aria-labelledby="book-title">
+  <div class="wrap twocol">
+    <div>
+      <p class="eyebrow">Book a lesson</p>
+      <h2 id="book-title">Pick a time that works.</h2>
+      <p>Call or email and we'll get you on Doc's calendar. Tell us a little about your game and what you'd like to work on.</p>
+      <div class="btnrow">
+        <a class="btn btn--primary btn--lg" href="tel:{{ site.phone | replace('(', '') | replace(') ', '-') }}" data-track="book_lesson:lessons_call">Call {{ site.phone }}</a>
+        <a class="btn btn--outline btn--lg" href="mailto:{{ site.email }}?subject=Lesson%20with%20Doc" data-track="book_lesson:lessons_email">Email us</a>
+      </div>
+    </div>
+    <div class="ratecard">
+      <h3>Lesson pricing</h3>
+      {{ rates(pricing.lessons) }}
+    </div>
+  </div>
+</section>
+
+<div class="wrap section section--tight">{{ finalcta(site.booking_url, "Practice makes… better.", "Put the lesson to work in a bay.") }}</div>

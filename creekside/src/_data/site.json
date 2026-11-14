@@ -1,0 +1,27 @@
+{
+  "name": "Creekside",
+  "tagline": "Golf • Food • Fun",
+  "url": "https://www.example.com",
+  "description": "Toptracer bays, mini golf, lessons, food and events. Creekside is your game, your people, your kind of place.",
+  "booking_url": "/bays/#rent",
+  "lesson_url": "/lessons/#book",
+  "order_url": "/food/#order",
+  "phone": "(555) 555-0199",
+  "email": "hello@example.com",
+  "events_email": "events@example.com",
+  "address": {
+    "street": "123 Creekside Drive",
+    "city": "Your Town",
+    "state": "PA",
+    "zip": "00000",
+    "map_url": "https://maps.google.com/?q=Creekside+Golf"
+  },
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "analytics": {
+    "ga4_id": ""
+  },
+  "preview_notice": "Preview build: hours, pricing, menu, contact details and photography are placeholders awaiting final content."
+}
