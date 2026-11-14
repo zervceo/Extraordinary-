@@ -1,0 +1,48 @@
+---
+layout: base.njk
+title: "Mini Golf"
+description: "18 holes of mini golf at Creekside. No tee time, no handicap, no experience required. Great for families, dates and groups."
+permalink: /mini-golf/
+---
+{%- from "icons.njk" import icon, btn, rates, pagehero, finalcta -%}
+{% call pagehero("Mini Golf", "Wait… Creekside has mini golf?", "We sure do. " + minigolf.intro, "It's harder than it looks. You've been warned.", "minigolf", "A family playing the Creekside mini golf course") %}
+<div class="btnrow">{{ btn("Plan Your Visit", "/visit/", "white", "plan_visit:minigolf_hero") }}</div>
+{% endcall %}
+
+<div class="wrap section">
+  <ul class="stats" aria-label="Mini golf at a glance">
+    <li><strong>{{ minigolf.holes }}</strong><span>holes</span></li>
+    <li><strong>{{ minigolf.time }}</strong><span>per round</span></li>
+    <li><strong>{{ minigolf.ages }}</strong><span>welcome</span></li>
+  </ul>
+  <ul class="tiles tiles--3">
+    {%- for h in minigolf.highlights %}
+    <li class="tile"><h3>{{ h.title }}</h3><p>{{ h.text }}</p></li>
+    {%- endfor %}
+  </ul>
+</div>
+
+<section class="band band--cream" aria-labelledby="mgprice-title">
+  <div class="wrap twocol">
+    <div>
+      <p class="eyebrow">Good to know</p>
+      <h2 id="mgprice-title">An easy way to spend time outside.</h2>
+      <p>Have a little friendly competition and enjoy Creekside even if swinging a driver isn't your thing.</p>
+      <ul class="checks">
+        {%- for g in minigolf.good_to_know %}
+        <li>{{ icon("check") }}{{ g }}</li>
+        {%- endfor %}
+      </ul>
+      <div class="btnrow">
+        {{ btn("Plan a Party", "/events/#plan", "primary", "plan_event:minigolf") }}
+        {{ btn("See Hours", "/visit/#hours", "outline", "hours:minigolf") }}
+      </div>
+    </div>
+    <div class="ratecard">
+      <h3>Mini golf pricing</h3>
+      {{ rates(pricing.minigolf) }}
+    </div>
+  </div>
+</section>
+
+<div class="wrap section section--tight">{{ finalcta(site.booking_url, "Putt first. Then hit a few.", "Make a day of it.") }}</div>

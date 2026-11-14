@@ -1,0 +1,36 @@
+{
+  "note": "Menu and pricing subject to change. Ask about today's specials.",
+  "sections": [
+    {
+      "name": "Shareables",
+      "items": [
+        { "name": "Loaded Range Fries", "description": "Cheese sauce, bacon, scallions, ranch.", "price": "$10" },
+        { "name": "Soft Pretzel Bites", "description": "Beer cheese and spicy mustard.", "price": "$9" },
+        { "name": "Wings", "description": "Buffalo, garlic parm or BBQ. Celery and blue cheese.", "price": "$14" }
+      ]
+    },
+    {
+      "name": "Handhelds",
+      "items": [
+        { "name": "The Creekside Burger", "description": "Double patty, American cheese, bacon, lettuce, tomato, house sauce.", "price": "$15" },
+        { "name": "Crispy Chicken Sandwich", "description": "Pickles, slaw, hot honey.", "price": "$14" },
+        { "name": "Cheesesteak", "description": "Shaved ribeye, fried onions, your choice of cheese.", "price": "$15" }
+      ]
+    },
+    {
+      "name": "Lighter Side",
+      "items": [
+        { "name": "Clubhouse Salad", "description": "Greens, tomato, cucumber, cheddar, croutons. Add chicken +$4.", "price": "$11" },
+        { "name": "Chicken Caesar Wrap", "description": "Romaine, parmesan, Caesar dressing.", "price": "$12" }
+      ]
+    },
+    {
+      "name": "Drinks",
+      "items": [
+        { "name": "Draft Beer", "description": "Rotating local and domestic taps.", "price": "$6+" },
+        { "name": "Cocktails & Seltzers", "description": "Ask your server what's pouring.", "price": "$8+" },
+        { "name": "Fountain Drinks & Iced Tea", "description": "Free refills.", "price": "$3" }
+      ]
+    }
+  ]
+}

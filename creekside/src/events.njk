@@ -1,0 +1,99 @@
+---
+layout: base.njk
+title: "Events"
+description: "What's happening at Creekside: $10 Tuesdays, weekly trivia, clinics and seasonal events. Plus birthdays, corporate outings and tent rentals for your own event."
+permalink: /events/
+---
+{%- from "icons.njk" import icon, btn, pagehero, finalcta -%}
+{% call pagehero("Events", "There's always something going on.", "Some days, we're the ones making the plans. Other days, you are.", "More good times ahead.", "cheers", "Friends toasting at Creekside") %}
+<div class="btnrow">
+  {{ btn("What's Happening", "#whats-happening", "white", "see_whats_happening:events_hero") }}
+  {{ btn("Plan an Event", "#plan", "ghost", "plan_event:events_hero") }}
+</div>
+{% endcall %}
+
+<section class="wrap section" id="whats-happening" aria-labelledby="wh-title">
+  <div class="sectionhead">
+    <p class="eyebrow">What's happening</p>
+    <h2 id="wh-title">On the calendar at Creekside</h2>
+  </div>
+  <ul class="eventlist">
+    {%- for e in collections.happenings %}
+    <li class="event">
+      <div class="event__icon">{{ icon(e.data.icon) }}</div>
+      <div class="event__body">
+        <p class="event__when">{{ e.data.schedule }}</p>
+        <h3>{{ e.data.title }}</h3>
+        <p class="lede">{{ e.data.summary }}</p>
+        {{ e.content | safe }}
+      </div>
+    </li>
+    {%- endfor %}
+  </ul>
+</section>
+
+<section class="band band--cream" id="your-event" aria-labelledby="ye-title">
+  <div class="wrap">
+    <div class="sectionhead">
+      <p class="eyebrow">Your event. Our place.</p>
+      <h2 id="ye-title">Need somewhere a little more fun than the usual four walls?</h2>
+    </div>
+    <div class="eventsplit">
+    <ul class="tiles tiles--stack tiles--white">
+      {%- for p in privateEvents %}
+      <li class="tile">{{ icon(p.icon) }}<h3>{{ p.title }}</h3><p>{{ p.detail }}</p></li>
+      {%- endfor %}
+    </ul>
+    <figure class="widephoto">
+      <img src="/assets/img/tent.webp" alt="The Creekside tent set for a private event" loading="lazy" width="288" height="554">
+      <figcaption class="script script--light">You bring the people. We’ll help with the fun.</figcaption>
+    </figure>
+    </div>
+  </div>
+</section>
+
+<section class="wrap section" id="plan" aria-labelledby="plan-title">
+  <div class="twocol twocol--top">
+    <div>
+      <p class="eyebrow">Plan an event</p>
+      <h2 id="plan-title">Tell us what you're thinking.</h2>
+      <p>Give us the basics and we'll get back to you within one business day with availability, options and pricing.</p>
+      <ul class="checks">
+        <li>{{ icon("check") }}Groups from 8 to 200+</li>
+        <li>{{ icon("check") }}Bays, mini golf, tent, or any combination</li>
+        <li>{{ icon("check") }}Food and drink packages</li>
+      </ul>
+      <p>Rather talk it through? Call <a href="tel:{{ site.phone | replace('(', '') | replace(') ', '-') }}" data-track="plan_event:call">{{ site.phone }}</a> or email <a href="mailto:{{ site.events_email }}">{{ site.events_email }}</a>.</p>
+    </div>
+    <form class="form" name="event-inquiry" method="POST" action="/events/thanks/" data-netlify="true" netlify-honeypot="company-website" data-track-form="event_inquiry">
+      <input type="hidden" name="form-name" value="event-inquiry">
+      <p class="hp"><label>Leave this empty <input name="company-website" tabindex="-1" autocomplete="off"></label></p>
+      <div class="form__row">
+        <label>Name<input type="text" name="name" autocomplete="name" required></label>
+        <label>Email<input type="email" name="email" autocomplete="email" required></label>
+      </div>
+      <div class="form__row">
+        <label>Phone<input type="tel" name="phone" autocomplete="tel"></label>
+        <label>Event type
+          <select name="event_type" required>
+            <option value="">Choose one</option>
+            <option>Birthday party</option>
+            <option>Corporate outing / retreat</option>
+            <option>Team building</option>
+            <option>Tent rental</option>
+            <option>Private gathering</option>
+            <option>Something else</option>
+          </select>
+        </label>
+      </div>
+      <div class="form__row">
+        <label>Preferred date<input type="date" name="date"></label>
+        <label>Group size<input type="number" name="guests" min="1" inputmode="numeric"></label>
+      </div>
+      <label>Anything else we should know?<textarea name="message" rows="4"></textarea></label>
+      <button class="btn btn--primary btn--lg" type="submit">Send Inquiry</button>
+    </form>
+  </div>
+</section>
+
+<div class="wrap section section--tight">{{ finalcta(site.booking_url) }}</div>

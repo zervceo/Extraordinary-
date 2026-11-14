@@ -1,0 +1,135 @@
+{%- from "icons.njk" import icon, logo, btn -%}
+{%- set pageTitle = (title + " | " + site.name) if title else (site.name + " | Golf. Food. Fun.") -%}
+{%- set pageDesc = description or site.description -%}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ pageTitle }}</title>
+  <meta name="description" content="{{ pageDesc }}">
+  <link rel="canonical" href="{{ page.url | absolute(site.url) }}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ site.name }}">
+  <meta property="og:title" content="{{ pageTitle }}">
+  <meta property="og:description" content="{{ pageDesc }}">
+  <meta property="og:url" content="{{ page.url | absolute(site.url) }}">
+  <meta property="og:image" content="{{ '/assets/img/hero.jpg' | absolute(site.url) }}">
+  <meta name="twitter:card" content="summary_large_image">
+  {% if noindex %}<meta name="robots" content="noindex">
+  {% endif %}<meta name="theme-color" content="#0f2a47">
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Sacramento&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["GolfCourse", "LocalBusiness"],
+    "name": {{ site.name | json | safe }},
+    "slogan": "Golf. Food. Fun.",
+    "description": {{ site.description | json | safe }},
+    "url": {{ site.url | json | safe }},
+    "telephone": {{ site.phone | json | safe }},
+    "image": {{ '/assets/img/hero.jpg' | absolute(site.url) | json | safe }},
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": {{ site.address.street | json | safe }},
+      "addressLocality": {{ site.address.city | json | safe }},
+      "addressRegion": {{ site.address.state | json | safe }},
+      "postalCode": {{ site.address.zip | json | safe }}
+    },
+    "openingHoursSpecification": [
+      {%- for d in hours.days %}
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": "https://schema.org/{{ d.day }}", "opens": "{{ d.open }}", "closes": "{{ d.close }}" }{% if not loop.last %},{% endif %}
+      {%- endfor %}
+    ]
+  }
+  </script>
+  {%- if site.analytics.ga4_id %}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.analytics.ga4_id }}"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','{{ site.analytics.ga4_id }}');</script>
+  {%- endif %}
+</head>
+<body class="{{ bodyClass }}">
+  <a class="skip" href="#main">Skip to content</a>
+
+  {%- if announcement.enabled and announcement.text %}
+  <div class="announce" role="region" aria-label="Announcement">
+    <p>{{ announcement.text }}{% if announcement.link_url %} <a href="{{ announcement.link_url }}" data-track="announcement">{{ announcement.link_label or "Learn more" }}</a>{% endif %}</p>
+  </div>
+  {%- endif %}
+
+  <header class="header" id="top">
+    <div class="header__inner wrap">
+      <a class="logo" href="/" aria-label="Creekside: Golf, Food, Fun. Home">{{ logo() }}</a>
+      <button class="navtoggle" type="button" aria-expanded="false" aria-controls="nav">
+        <span class="navtoggle__bars" aria-hidden="true"></span><span class="sr">Menu</span>
+      </button>
+      <nav class="nav" id="nav" aria-label="Main">
+        <ul>
+          {%- for item in nav %}
+          <li><a href="{{ item.url }}"{% if page.url == item.url %} aria-current="page"{% endif %}>{{ item.label }}</a></li>
+          {%- endfor %}
+        </ul>
+        <a class="btn btn--primary nav__cta" href="{{ site.booking_url }}" data-track="rent_a_bay:header">Rent a Bay{{ icon("arrow", "btn__arrow") }}</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    {{ content | safe }}
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__grid">
+      <div class="footer__brand">
+        <a class="logo logo--light" href="/" aria-label="Creekside home">{{ logo() }}</a>
+        <p>Your game. Your people. Your kind of place.</p>
+        <p class="script script--light">All are welcome.</p>
+      </div>
+      <div>
+        <h2 class="footer__h">Explore</h2>
+        <ul class="footer__links">
+          {%- for item in nav %}
+          <li><a href="{{ item.url }}">{{ item.label }}</a></li>
+          {%- endfor %}
+        </ul>
+      </div>
+      <div>
+        <h2 class="footer__h">Hours</h2>
+        <ul class="footer__hours">
+          {%- for d in hours.days %}
+          <li><span>{{ d.day | truncate(3, true, "") }}</span><span>{{ d.label }}</span></li>
+          {%- endfor %}
+        </ul>
+      </div>
+      <div>
+        <h2 class="footer__h">Find us</h2>
+        <address>
+          <a href="{{ site.address.map_url }}" data-track="directions:footer">{{ site.address.street }}<br>{{ site.address.city }}, {{ site.address.state }} {{ site.address.zip }}</a><br>
+          <a href="tel:{{ site.phone | replace('(', '') | replace(') ', '-') }}" data-track="call:footer">{{ site.phone }}</a><br>
+          <a href="mailto:{{ site.email }}">{{ site.email }}</a>
+        </address>
+        {%- if site.social.facebook or site.social.instagram %}
+        <p class="footer__social">
+          {% if site.social.facebook %}<a href="{{ site.social.facebook }}" rel="noopener">Facebook</a>{% endif %}
+          {% if site.social.instagram %}<a href="{{ site.social.instagram }}" rel="noopener">Instagram</a>{% endif %}
+        </p>
+        {%- endif %}
+      </div>
+    </div>
+    <div class="wrap footer__base">
+      <p>© {% year %} {{ site.name }}. Good golf. Good food. Good people. Brighter days.</p>
+      {% if site.preview_notice %}<p class="footer__preview">{{ site.preview_notice }}</p>{% endif %}
+    </div>
+  </footer>
+
+  <div class="stickycta" aria-hidden="false">
+    <a class="btn btn--primary" href="{{ site.booking_url }}" data-track="rent_a_bay:sticky_mobile">Rent a Bay{{ icon("arrow", "btn__arrow") }}</a>
+  </div>
+
+  <script src="/assets/js/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+# Creekside content manager (Decap CMS). Lives at /admin/ on the live site.
+# Staff log in, edit a form, press Publish. The site rebuilds automatically.
+backend:
+  name: git-gateway
+  branch: main
+local_backend: true
+media_folder: creekside/src/assets/img
+public_folder: /assets/img
+site_url: https://www.example.com
+
+collections:
+  - name: everyday
+    label: "Hours, Pricing & Announcements"
+    files:
+      - name: announcement
+        label: "Homepage Announcement Bar"
+        file: creekside/src/_data/announcement.json
+        fields:
+          - { name: enabled, label: "Show announcement", widget: boolean, default: true }
+          - { name: text, label: "Announcement text", widget: string }
+          - { name: link_label, label: "Link text", widget: string, required: false }
+          - { name: link_url, label: "Link URL", widget: string, required: false }
+      - name: hours
+        label: "Hours"
+        file: creekside/src/_data/hours.json
+        fields:
+          - { name: note, label: "Note under hours", widget: text, required: false }
+          - name: days
+            label: "Days"
+            widget: list
+            allow_add: false
+            summary: "{{day}}: {{label}}"
+            fields:
+              - { name: day, label: "Day", widget: string }
+              - { name: schema, label: "Day code (do not change)", widget: hidden }
+              - { name: label, label: "Hours as shown (e.g. 9am – 9pm)", widget: string }
+              - { name: open, label: "Opens (24h, e.g. 09:00)", widget: string }
+              - { name: close, label: "Closes (24h, e.g. 21:00)", widget: string }
+      - name: pricing
+        label: "Pricing"
+        file: creekside/src/_data/pricing.json
+        fields:
+          - &rategroup
+            name: bays
+            label: "Toptracer Bays"
+            widget: object
+            fields:
+              - { name: note, label: "Note", widget: string, required: false }
+              - name: rates
+                label: "Rates"
+                widget: list
+                summary: "{{name}}: {{price}}"
+                fields:
+                  - { name: name, label: "Name", widget: string }
+                  - { name: price, label: "Price", widget: string }
+                  - { name: unit, label: "Unit (e.g. per bay / hour)", widget: string }
+          - { <<: *rategroup, name: minigolf, label: "Mini Golf" }
+          - { <<: *rategroup, name: lessons, label: "Lessons" }
+
+  - name: happenings
+    label: "Events & Promotions (What's Happening)"
+    label_singular: "Event or Promotion"
+    folder: creekside/src/events
+    create: true
+    slug: "{{slug}}"
+    summary: "{{title}} ({{schedule}})"
+    sortable_fields: [order, title]
+    fields:
+      - { name: title, label: "Title", widget: string }
+      - { name: schedule, label: "When (e.g. Thursdays at 7pm)", widget: string }
+      - { name: summary, label: "Short description", widget: text }
+      - name: icon
+        label: "Icon"
+        widget: select
+        options: [bucket, bulb, calendar, flag, star, trophy, games, cake, team, tent]
+        default: calendar
+      - { name: featured, label: "Feature on homepage", widget: boolean, default: false }
+      - { name: order, label: "Sort order (lower shows first)", widget: number, default: 10 }
+      - { name: published, label: "Published", widget: boolean, default: true }
+      - { name: body, label: "Details", widget: markdown, required: false }
+
+  - name: pages
+    label: "Food, Mini Golf & Private Events"
+    files:
+      - name: menu
+        label: "Food Menu"
+        file: creekside/src/_data/menu.json
+        fields:
+          - { name: note, label: "Note under menu", widget: string, required: false }
+          - name: sections
+            label: "Menu sections"
+            widget: list
+            summary: "{{name}}"
+            fields:
+              - { name: name, label: "Section name", widget: string }
+              - name: items
+                label: "Items"
+                widget: list
+                summary: "{{name}}: {{price}}"
+                fields:
+                  - { name: name, label: "Item", widget: string }
+                  - { name: description, label: "Description", widget: string, required: false }
+                  - { name: price, label: "Price", widget: string }
+      - name: minigolf
+        label: "Mini Golf Information"
+        file: creekside/src/_data/minigolf.json
+        fields:
+          - { name: intro, label: "Intro", widget: text }
+          - { name: holes, label: "Number of holes", widget: string }
+          - { name: time, label: "Time per round", widget: string }
+          - { name: ages, label: "Ages", widget: string }
+          - name: highlights
+            label: "Highlights"
+            widget: list
+            summary: "{{title}}"
+            fields:
+              - { name: title, label: "Title", widget: string }
+              - { name: text, label: "Text", widget: text }
+          - { name: good_to_know, label: "Good to know", widget: list, field: { name: item, label: "Item", widget: string } }
+      - name: privateEvents
+        label: "Your Event. Our Place."
+        file: creekside/src/_data/privateEvents.json
+        fields:
+          - name: items
+            label: "Event types"
+            widget: list
+            root: true
+            summary: "{{title}}"
+            fields:
+              - { name: title, label: "Title", widget: string }
+              - { name: icon, label: "Icon", widget: select, options: [cake, team, tent, star, trophy, calendar] }
+              - { name: summary, label: "Homepage summary", widget: text }
+              - { name: detail, label: "Events page description", widget: text }
+
+  - name: settings
+    label: "Site Settings"
+    files:
+      - name: site
+        label: "Contact, Booking Links & Analytics"
+        file: creekside/src/_data/site.json
+        fields:
+          - { name: name, label: "Site name", widget: string }
+          - { name: tagline, label: "Tagline", widget: string }
+          - { name: url, label: "Live site URL", widget: string }
+          - { name: description, label: "Default search description", widget: text }
+          - { name: booking_url, label: "Rent a Bay link (booking system URL)", widget: string }
+          - { name: lesson_url, label: "Book a Lesson link", widget: string }
+          - { name: order_url, label: "Order Food link", widget: string }
+          - { name: phone, label: "Phone", widget: string }
+          - { name: email, label: "Email", widget: string }
+          - { name: events_email, label: "Events email", widget: string }
+          - name: address
+            label: "Address"
+            widget: object
+            fields:
+              - { name: street, label: "Street", widget: string }
+              - { name: city, label: "City", widget: string }
+              - { name: state, label: "State", widget: string }
+              - { name: zip, label: "ZIP", widget: string }
+              - { name: map_url, label: "Google Maps link", widget: string }
+          - name: social
+            label: "Social"
+            widget: object
+            fields:
+              - { name: facebook, label: "Facebook URL", widget: string, required: false }
+              - { name: instagram, label: "Instagram URL", widget: string, required: false }
+          - name: analytics
+            label: "Analytics"
+            widget: object
+            fields:
+              - { name: ga4_id, label: "Google Analytics 4 ID (G-XXXXXXX)", widget: string, required: false }
+          - { name: preview_notice, label: "Preview notice in footer (clear at launch)", widget: string, required: false }

@@ -1,0 +1,74 @@
+{%- macro icon(name, cls="icon") -%}
+<svg class="{{ cls }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+{%- if name == "arrow" %}<path d="M9 6l6 6-6 6"/>
+{%- elif name == "practice" %}<path d="M5 20v-6M12 20V9M19 20V4"/><path d="M3 20h18"/>
+{%- elif name == "games" %}<path d="M7 8h10a5 5 0 0 1 4.9 6l-.5 2.4a2.6 2.6 0 0 1-4.6 1L15 15H9l-1.8 2.4a2.6 2.6 0 0 1-4.6-1L2.1 14A5 5 0 0 1 7 8z"/><path d="M7 11v3M5.5 12.5h3M16 11.5h.01M18 13.5h.01"/>
+{%- elif name == "flag" %}<path d="M7 21V3l11 4.5L7 12"/><path d="M4 21h9"/>
+{%- elif name == "trophy" %}<path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 6H5a3 3 0 0 0 3 3M16 6h3a3 3 0 0 1-3 3M12 13v4M8.5 20h7M10 17h4"/>
+{%- elif name == "bucket" %}<path d="M4 7h16l-2 13H6L4 7z"/><path d="M4 7c0-1.5 3.6-3 8-3s8 1.5 8 3M9 11v5M12 11v5M15 11v5"/>
+{%- elif name == "bulb" %}<path d="M9 17h6M10 20h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.9 1.1 1 2.1h5c.1-1 .5-1.7 1-2.1A6 6 0 0 0 12 3z"/>
+{%- elif name == "calendar" %}<rect x="3.5" y="5" width="17" height="15" rx="1.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4M8 13h.01M12 13h.01M16 13h.01M8 16.5h.01M12 16.5h.01"/>
+{%- elif name == "cake" %}<path d="M4 20h16v-7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7z"/><path d="M4 16c1.3 0 1.3-1 2.7-1s1.3 1 2.6 1 1.4-1 2.7-1 1.3 1 2.7 1 1.3-1 2.6-1 1.4 1 2.7 1M8 11V8M12 11V8M16 11V8M8 5.5v.01M12 5.5v.01M16 5.5v.01M2.5 20h19"/>
+{%- elif name == "team" %}<circle cx="12" cy="7" r="3"/><circle cx="5" cy="10" r="2.2"/><circle cx="19" cy="10" r="2.2"/><path d="M7 20v-2a5 5 0 0 1 10 0v2M1.5 19v-1a3.5 3.5 0 0 1 4.5-3.3M22.5 19v-1a3.5 3.5 0 0 0-4.5-3.3"/>
+{%- elif name == "tent" %}<path d="M12 3l9 8v9H3v-9l9-8z"/><path d="M12 3v3M9 20v-6l3-3 3 3v6M3 11h18"/>
+{%- elif name == "star" %}<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9L3.5 9.7l5.9-.8L12 3.5z"/>
+{%- elif name == "clock" %}<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>
+{%- elif name == "pin" %}<path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>
+{%- elif name == "phone" %}<path d="M5 4h4l1.5 4.5-2 1.5a12 12 0 0 0 5.5 5.5l1.5-2L20 15v4a1.5 1.5 0 0 1-1.5 1.5A15.5 15.5 0 0 1 3.5 5.5 1.5 1.5 0 0 1 5 4z"/>
+{%- elif name == "mail" %}<rect x="3" y="5.5" width="18" height="13" rx="1.5"/><path d="M3.5 7l8.5 6 8.5-6"/>
+{%- elif name == "users" %}<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20v-1.5a6.5 6.5 0 0 1 13 0V20M16 5a3.2 3.2 0 0 1 0 6.2M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/>
+{%- elif name == "check" %}<path d="M5 12.5l4.5 4.5L19 7.5"/>
+{%- endif -%}
+</svg>
+{%- endmacro -%}
+
+{%- macro logo() -%}
+<svg class="logo__mark" viewBox="0 0 48 52" aria-hidden="true" focusable="false">
+  <path fill="currentColor" d="M20 3h8v3.5h-8zM22 6.5h4V10h-4z"/>
+  <path fill="currentColor" d="M24 9c8 0 11 6 11.5 14 .4 7 2 12 6.5 17v3H6v-3c4.5-5 6.1-10 6.5-17C13 15 16 9 24 9z"/>
+  <path fill="currentColor" d="M19 45h10a5 5 0 0 1-10 0z"/>
+  <circle cx="15" cy="38" r="9" fill="#fff" stroke="currentColor" stroke-width="1.8"/>
+  <g fill="currentColor"><circle cx="12" cy="35" r=".9"/><circle cx="16" cy="34" r=".9"/><circle cx="19.5" cy="37" r=".9"/><circle cx="14" cy="38.5" r=".9"/><circle cx="10.5" cy="39.5" r=".9"/><circle cx="17.5" cy="41.5" r=".9"/><circle cx="13.5" cy="42.5" r=".9"/></g>
+</svg>
+<span class="logo__text"><span class="logo__name">Creekside</span><span class="logo__tag">Golf <i>•</i> Food <i>•</i> Fun</span></span>
+{%- endmacro -%}
+
+{%- macro btn(label, url, style="primary", track="") -%}
+<a class="btn btn--{{ style }}" href="{{ url }}"{% if track %} data-track="{{ track }}"{% endif %}>{{ label }}{{ icon("arrow", "btn__arrow") }}</a>
+{%- endmacro -%}
+
+{%- macro rates(group) -%}
+<div class="rates">
+  <ul class="rates__list">
+  {%- for r in group.rates %}
+    <li class="rates__item"><span class="rates__name">{{ r.name }}<small>{{ r.unit }}</small></span><span class="rates__dots" aria-hidden="true"></span><span class="rates__price">{{ r.price }}</span></li>
+  {%- endfor %}
+  </ul>
+  {% if group.note %}<p class="rates__note">{{ group.note }}</p>{% endif %}
+</div>
+{%- endmacro -%}
+
+{%- macro pagehero(eyebrow, title, lead, script, img, alt) -%}
+<section class="pagehero">
+  <img class="pagehero__img" src="/assets/img/{{ img }}.webp" alt="{{ alt }}" fetchpriority="high">
+  <div class="pagehero__inner wrap">
+    <p class="eyebrow eyebrow--light">{{ eyebrow }}</p>
+    <h1>{{ title | safe }}</h1>
+    <p class="pagehero__lead">{{ lead }}</p>
+    {% if script %}<p class="script script--light">{{ script }}</p>{% endif %}
+    {{ caller() if caller }}
+  </div>
+</section>
+{%- endmacro -%}
+
+{%- macro finalcta(url, title="So… who's hitting first?", sub="Your bay is waiting.") -%}
+<section class="finalcta" aria-labelledby="finalcta-title">
+  <div class="finalcta__inner wrap">
+    <h2 id="finalcta-title">{{ title }}</h2>
+    <p class="finalcta__sub">{{ sub }}</p>
+    {{ btn("Rent a Bay", url, "primary btn--lg", "rent_a_bay:final_cta") }}
+    <p class="finalcta__line">Book a lesson. Grab some food. Bring your people.</p>
+    <p class="script script--light">Golf. Food. Fun.</p>
+  </div>
+</section>
+{%- endmacro -%}

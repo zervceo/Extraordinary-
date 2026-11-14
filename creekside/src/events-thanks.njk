@@ -1,0 +1,14 @@
+---
+layout: base.njk
+title: "Thanks!"
+permalink: /events/thanks/
+eleventyExcludeFromCollections: true
+noindex: true
+---
+{%- from "icons.njk" import btn -%}
+<div class="wrap section center narrow messagepage">
+  <p class="eyebrow">Inquiry received</p>
+  <h1>Thanks. We're on it.</h1>
+  <p>We'll be in touch within one business day. In the meantime, there's a bay with your name on it.</p>
+  <div class="btnrow btnrow--center">{{ btn("Rent a Bay", site.booking_url, "primary btn--lg", "rent_a_bay:thanks") }}</div>
+</div>

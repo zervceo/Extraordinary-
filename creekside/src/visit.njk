@@ -1,0 +1,64 @@
+---
+layout: base.njk
+title: "Visit"
+description: "Hours, directions, pricing and everything you need to plan your visit to Creekside."
+permalink: /visit/
+---
+{%- from "icons.njk" import icon, btn, rates, pagehero, finalcta -%}
+{% call pagehero("Visit", "Don't overthink it.", "You don't need the latest clubs. You don't need a single-digit handicap. You definitely don't need a perfect swing. Bring some friends. We'll take it from there.", "All are welcome.", "sign", "Wooden welcome sign at Creekside") %}
+<p class="openbadge" data-open-badge data-hours='{{ hours.days | json | safe }}' hidden></p>
+{% endcall %}
+
+<div class="wrap section twocol twocol--top" id="hours">
+  <div class="ratecard">
+    <h2 class="h3">{{ icon("clock") }} Hours</h2>
+    <table class="hours">
+      <caption class="sr">Opening hours</caption>
+      <tbody>
+        {%- for d in hours.days %}
+        <tr><th scope="row">{{ d.day }}</th><td>{{ d.label }}</td></tr>
+        {%- endfor %}
+      </tbody>
+    </table>
+    {% if hours.note %}<p class="rates__note">{{ hours.note }}</p>{% endif %}
+  </div>
+  <div class="ratecard">
+    <h2 class="h3">{{ icon("pin") }} Find us</h2>
+    <address class="bigaddress">{{ site.address.street }}<br>{{ site.address.city }}, {{ site.address.state }} {{ site.address.zip }}</address>
+    <p><a href="tel:{{ site.phone | replace('(', '') | replace(') ', '-') }}" data-track="call:visit">{{ site.phone }}</a><br><a href="mailto:{{ site.email }}">{{ site.email }}</a></p>
+    <p>Free parking right out front. The whole place is on one level and easy to get around.</p>
+    <div class="btnrow">
+      {{ btn("Get Directions", site.address.map_url, "primary", "directions:visit") }}
+    </div>
+  </div>
+</div>
+
+<section class="band band--cream" id="pricing" aria-labelledby="pricing-title">
+  <div class="wrap">
+    <div class="sectionhead">
+      <p class="eyebrow">Pricing</p>
+      <h2 id="pricing-title">What it costs</h2>
+    </div>
+    <div class="threecol">
+      <div class="ratecard"><h3>Toptracer bays</h3>{{ rates(pricing.bays) }}<div class="btnrow">{{ btn("Rent a Bay", site.booking_url, "primary btn--sm", "rent_a_bay:visit_pricing") }}</div></div>
+      <div class="ratecard"><h3>Mini golf</h3>{{ rates(pricing.minigolf) }}<div class="btnrow">{{ btn("Discover Mini Golf", "/mini-golf/", "outline btn--sm", "discover_mini_golf:visit") }}</div></div>
+      <div class="ratecard"><h3>Lessons</h3>{{ rates(pricing.lessons) }}<div class="btnrow">{{ btn("Book a Lesson", site.lesson_url, "outline btn--sm", "book_lesson:visit") }}</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap section">
+  <div class="sectionhead">
+    <p class="eyebrow">Questions people ask</p>
+    <h2>Before you come</h2>
+  </div>
+  <div class="faq">
+    <details><summary>Do I need my own clubs?</summary><p>Nope. We have clubs you can borrow for free, for adults and kids.</p></details>
+    <details><summary>Do I need a reservation?</summary><p>Walk-ins are always welcome. For evenings, weekends and groups, reserving a bay ahead of time is the safe move.</p></details>
+    <details><summary>I've never played golf. Is that okay?</summary><p>That's most of the fun. The Toptracer games are built for all skill levels, and mini golf requires exactly zero experience.</p></details>
+    <details><summary>Can we just come for food?</summary><p>Absolutely. Golf is encouraged, not required.</p></details>
+    <details><summary>What happens if it rains?</summary><p>The bays are covered, so a little rain doesn't stop anything. For severe weather, call ahead.</p></details>
+  </div>
+</div>
+
+<div class="wrap section section--tight">{{ finalcta(site.booking_url) }}</div>
